@@ -1,0 +1,76 @@
+data = readtable('rom.csv');
+
+numTotal = height(data);
+numSample = round(0.05 * numTotal);  % Take 5% of cities
+idx = randperm(numTotal, numSample);  
+
+% Extract selected cities and their coordinates
+cities = data.cityname(idx);
+lat = data.latitude(idx);
+lon = data.longitude(idx);
+
+numCities = length(lat);
+k = 5; % Number of nearest neighbors
+edges = [];
+weights = [];
+
+% Construct Nearest-Neighbor Graph
+distMatrix = pdist2([lat, lon], [lat, lon]); 
+for i = 1:numCities
+    [~, idxSort] = sort(distMatrix(i, :)); % Sort by distance
+    for j = 2:k+1
+        edges = [edges; i, idxSort(j)];
+        weights = [weights; distMatrix(i, idxSort(j))]; % Store edge weight
+    end
+end
+
+G = graph(edges(:,1), edges(:,2));
+G.Edges.Weight = weights;  % Add edge weights to the graph
+
+%% Select Random Start and End Cities
+startNode = randi(numCities);
+endNode = randi(numCities);
+while startNode == endNode
+    endNode = randi(numCities);
+end
+
+%% Compute Shortest Paths
+tic;
+[distA, pathA] = astar(G, lat, lon, startNode, endNode);
+timeA = toc;
+
+disp(['A* Distance: ', num2str(distA(end))]);
+disp(['A* Time: ', num2str(timeA), ' sec']);
+
+%% Plot Map with Optimized Routes
+figure;
+geobasemap streets; % Use real-world map
+hold on;
+
+% Plot cities
+geoscatter(lat, lon, 20, 'r', 'filled');
+
+% Plot graph edges with different color for A* path
+for i = 1:size(edges,1)
+    latPoints = [lat(edges(i,1)), lat(edges(i,2))];
+    lonPoints = [lon(edges(i,1)), lon(edges(i,2))];
+    
+    % Check if the edge is part of the A* path
+    if ismember(edges(i,1), pathA) && ismember(edges(i,2), pathA)
+        % If the edge is part of the A* path, color it differently
+        geoplot(latPoints, lonPoints, 'm-', 'LineWidth', 2); % A* path edges in magenta
+    else
+        % Otherwise, keep the normal color
+        geoplot(latPoints, lonPoints, 'b-', 'LineWidth', 1); % Regular edges in blue
+    end
+end
+
+% Plot A* path (individual nodes)
+if ~isempty(pathA)
+    geoplot(lat(pathA), lon(pathA), 'm--', 'LineWidth', 2, 'Color', 'w'); % White dashed line for the A* path
+end
+geoplot(lat())
+% Labels
+title('Optimized Routes (A*)');
+legend({'Cities', 'Graph Edges (A* Path)', 'Graph Edges (Others)', 'A* Path'}, 'Location', 'best');
+hold off;
