@@ -4,7 +4,6 @@ node_ids = nodes.NodeID;
 latitudes = nodes.Latitude;
 longitudes = nodes.Longitude;
 
-% Rotate coordinates to align with Romania % Rotate 90 degrees counterclockwise
 center_lat = mean(latitudes);
 center_lon = mean(longitudes);
 
@@ -37,7 +36,7 @@ end
 fig = figure;
 geoaxes;
 hold on;
-title('Graph Visualization on Map');
+title('Graph');
 
 % Plot the nodes
 scatter(rotated_longitudes, rotated_latitudes, 50, 'b', 'filled');
@@ -52,8 +51,8 @@ for i = 1:height(edges)
     end
 end
 
-% Allow user to select start and goal nodes
-disp('Click on two nodes: Start and End');
+% select start and goal nodes
+disp('Apasa pe 2 noduri pentru: Start si End');
 [selected_x, selected_y] = ginput(2);
 
 % Find the closest nodes to the clicked points
