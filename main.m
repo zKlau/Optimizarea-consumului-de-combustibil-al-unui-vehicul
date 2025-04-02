@@ -4,6 +4,8 @@ node_ids = nodes.NodeID;
 latitudes = nodes.Latitude;
 longitudes = nodes.Longitude;
 
+angle = 0;
+
 center_lat = mean(latitudes);
 center_lon = mean(longitudes);
 
@@ -51,16 +53,15 @@ for i = 1:height(edges)
     end
 end
 
-% select start and goal nodes
-disp('Apasa pe 2 noduri pentru: Start si End');
-[selected_x, selected_y] = ginput(2);
+disp('Click on two nodes: Start and End');
+%[selected_x, selected_y] = ginput(2);
 
 % Find the closest nodes to the clicked points
-[~, start_idx] = min(vecnorm([rotated_longitudes - selected_x(1), rotated_latitudes - selected_y(1)]'));
-[~, goal_idx] = min(vecnorm([rotated_longitudes - selected_x(2), rotated_latitudes - selected_y(2)]'));
+%[~, start_idx] = min(vecnorm([rotated_longitudes - selected_x(1), rotated_latitudes - selected_y(1)]'));
+%[~, goal_idx] = min(vecnorm([rotated_longitudes - selected_x(2), rotated_latitudes - selected_y(2)]'));
 
-start_id = node_ids(start_idx);
-goal_id = node_ids(goal_idx);
+start_id = node_ids(100); % 1, 100
+goal_id = node_ids(56); % 56, 169
 
 tic;
 pathAstar = astar(start_id, goal_id, graph_matrix, rotated_latitudes, rotated_longitudes, node_ids);
